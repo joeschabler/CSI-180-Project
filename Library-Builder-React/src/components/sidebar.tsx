@@ -58,26 +58,28 @@ export const Sidebar: FC<SidebarProps> = ({
                 🏠 {status === "open" && <span>Home</span>}
               </a>
             </li>
-            <li style={{ marginTop: "15px" }}>
-              <button
-                onClick={onAddShelf}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  padding: 0,
-                  cursor: "pointer",
-                  fontSize: "1rem",
-                  color: "black",
-                  width: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: status === "open" ? "flex-start" : "center",
-                  gap: "8px",
-                }}
-              >
-                ➕ {status === "open" && <span>Add Shelf</span>}
-              </button>
-            </li>
+            {mode === "edit" && (
+              <li style={{ marginTop: "15px" }}>
+                <button
+                  onClick={onAddShelf}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    padding: 0,
+                    cursor: "pointer",
+                    fontSize: "1rem",
+                    color: "black",
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: status === "open" ? "flex-start" : "center",
+                    gap: "8px",
+                  }}
+                >
+                  ➕ {status === "open" && <span>Add Bookshelf</span>}
+                </button>
+              </li>
+            )}
           </ul>
         </nav>
       </div>

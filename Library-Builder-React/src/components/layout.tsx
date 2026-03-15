@@ -27,9 +27,17 @@ const Layout = ({
   return (
     <div
       className="layout-wrapper"
-      style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+        overflowY: "scroll",
+        width: "100%",
+        minWidth: "100vw",
+        overflowX: "hidden",
+      }}
     >
-      <Header title={title} />
+      <Header title={title} mode={mode} setMode={setMode} />
 
       <div style={{ display: "flex", flex: 1 }}>
         <div
@@ -40,7 +48,7 @@ const Layout = ({
             borderRight: "1px solid #ddd",
             display: "flex",
             flexDirection: "column",
-            minHeight: "calc(100vh - 60px)",
+            minHeight: "calc(100vh - 70px)",
           }}
         >
           <Sidebar

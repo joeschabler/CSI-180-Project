@@ -9,6 +9,7 @@ export interface BookProps {
   pageCount?: number;
   coverArt?: string;
   edition?: string;
+  onClick?: () => void;
 }
 
 export const Book: FC<BookProps> = ({
@@ -20,9 +21,11 @@ export const Book: FC<BookProps> = ({
   pageCount,
   coverArt,
   edition,
+  onClick,
 }) => {
   return (
     <div
+      onClick={onClick}
       style={{
         height: height,
         width: width,
@@ -39,7 +42,7 @@ export const Book: FC<BookProps> = ({
         fontFamily: "sans-serif",
         padding: "5px",
         boxSizing: "border-box",
-        cursor: "pointer",
+        cursor: onClick ? "pointer" : "default",
         writingMode: "vertical-rl",
         textOrientation: "mixed",
       }}
