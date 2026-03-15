@@ -12,6 +12,7 @@ interface LayoutProps {
   setSidebarStatus: (status: sidebarCollapsed) => void;
   mode: AppMode;
   setMode: (mode: AppMode) => void;
+  onAddShelf: () => void;
 }
 
 const Layout = ({
@@ -21,6 +22,7 @@ const Layout = ({
   setSidebarStatus,
   mode,
   setMode,
+  onAddShelf,
 }: LayoutProps) => {
   return (
     <div
@@ -30,7 +32,6 @@ const Layout = ({
       <Header title={title} />
 
       <div style={{ display: "flex", flex: 1 }}>
-        {/* This wrapper controls the physical width of the sidebar area */}
         <div
           style={{
             width: sidebarStatus === "open" ? "240px" : "80px",
@@ -47,6 +48,7 @@ const Layout = ({
             setStatus={setSidebarStatus}
             mode={mode}
             setMode={setMode}
+            onAddShelf={onAddShelf}
           />
         </div>
 

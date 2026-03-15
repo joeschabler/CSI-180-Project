@@ -6,6 +6,7 @@ interface SidebarProps {
   setStatus: (status: sidebarCollapsed) => void;
   mode: AppMode;
   setMode: (mode: AppMode) => void;
+  onAddShelf: () => void;
 }
 
 export const Sidebar: FC<SidebarProps> = ({
@@ -13,6 +14,7 @@ export const Sidebar: FC<SidebarProps> = ({
   setStatus,
   mode,
   setMode,
+  onAddShelf,
 }) => {
   return (
     <aside
@@ -30,6 +32,11 @@ export const Sidebar: FC<SidebarProps> = ({
       <div>
         <button
           onClick={() => setStatus(status === "open" ? "closed" : "open")}
+          style={{
+            width: "100%",
+            display: "flex",
+            justifyContent: status === "open" ? "flex-start" : "center",
+          }}
         >
           {status === "open" ? "Collapse" : "→"}
         </button>
@@ -39,19 +46,37 @@ export const Sidebar: FC<SidebarProps> = ({
             <li>
               <a
                 href="#home"
-                style={{ textDecoration: "none", color: "black" }}
+                style={{
+                  textDecoration: "none",
+                  color: "black",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: status === "open" ? "flex-start" : "center",
+                  gap: "8px",
+                }}
               >
-                {/* Show text only if open */}
-                🏠 {status === "open" && "Home"}
+                🏠 {status === "open" && <span>Home</span>}
               </a>
             </li>
-            <li style={{ marginTop: "10px" }}>
-              <a
-                href="#docs"
-                style={{ textDecoration: "none", color: "black" }}
+            <li style={{ marginTop: "15px" }}>
+              <button
+                onClick={onAddShelf}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  padding: 0,
+                  cursor: "pointer",
+                  fontSize: "1rem",
+                  color: "black",
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: status === "open" ? "flex-start" : "center",
+                  gap: "8px",
+                }}
               >
-                📄 {status === "open" && "Documentation"}
-              </a>
+                ➕ {status === "open" && <span>Add Shelf</span>}
+              </button>
             </li>
           </ul>
         </nav>
@@ -60,11 +85,20 @@ export const Sidebar: FC<SidebarProps> = ({
       <div>
         <button
           onClick={() => setMode(mode === "edit" ? "content" : "edit")}
-          style={{ width: "100%", whiteSpace: "nowrap", overflow: "hidden" }}
+          style={{
+            width: "100%",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            cursor: "pointer",
+            display: "flex",
+            justifyContent: status === "open" ? "flex-start" : "center",
+            gap: "8px",
+          }}
         >
           🔄{" "}
-          {status === "open" &&
-            (mode === "edit" ? "View Library" : "Edit Library")}
+          {status === "open" && (
+            <span>{mode === "edit" ? "View Library" : "Edit Library"}</span>
+          )}
         </button>
       </div>
     </aside>
