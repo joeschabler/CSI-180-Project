@@ -83,26 +83,6 @@ export const Sidebar: FC<SidebarProps> = ({
           </ul>
         </nav>
       </div>
-
-      <div>
-        <button
-          onClick={() => setMode(mode === "edit" ? "content" : "edit")}
-          style={{
-            width: "100%",
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            cursor: "pointer",
-            display: "flex",
-            justifyContent: status === "open" ? "flex-start" : "center",
-            gap: "8px",
-          }}
-        >
-          🔄{" "}
-          {status === "open" && (
-            <span>{mode === "edit" ? "View Library" : "Edit Library"}</span>
-          )}
-        </button>
-      </div>
     </aside>
   );
 };

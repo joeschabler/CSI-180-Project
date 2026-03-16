@@ -1,5 +1,5 @@
 import "./App.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "./components/layout";
 import { Shelf } from "./components/shelf";
 import type { BookProps } from "./components/book";
@@ -21,7 +21,19 @@ type EditingBookState = {
 function App() {
   const [mode, setMode] = useState<AppMode>("edit");
   const [isCollapsed, setIsCollapsed] = useState<sidebarCollapsed>("open");
-  const [shelves, setShelves] = useState<ShelfData[]>([{ id: 1, books: [] }]);
+  const [shelves, setShelves] = useState<ShelfData[]>(() => {
+    const savedData = localStorage.getItem("library-shelves");
+
+    if (savedData) {
+      return JSON.parse(savedData);
+    }
+
+    return [{ id: 1, books: [] }];
+  });
+
+  useEffect(() => {
+    localStorage.setItem("library-shelves", JSON.stringify(shelves));
+  }, [shelves]);
 
   const [editingBook, setEditingBook] = useState<EditingBookState>(null);
 
