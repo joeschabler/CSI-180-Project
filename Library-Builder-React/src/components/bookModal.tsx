@@ -1,14 +1,14 @@
 import type { FC } from "react";
 import type { EditingBookState } from "../App";
 
-interface EditModalProps {
+interface BookModalProps {
   editingBook: NonNullable<EditingBookState>;
   setEditingBook: (state: EditingBookState) => void;
   saveEditedBook: () => void;
   deleteBook: () => void;
 }
 
-export const EditModal: FC<EditModalProps> = ({
+export const EditModal: FC<BookModalProps> = ({
   editingBook,
   setEditingBook,
   saveEditedBook,

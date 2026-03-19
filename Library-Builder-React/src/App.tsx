@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 import Layout from "./components/layout";
 import { Shelf } from "./components/shelf";
 import type { BookProps } from "./components/book";
-import { EditModal } from "./components/editModal";
+import { EditModal } from "./components/bookModal";
+import { ShelfModal } from "./components/shelfModal";
 
 export type AppMode = "edit" | "content";
 export type sidebarCollapsed = "open" | "closed";
@@ -11,6 +12,7 @@ export type sidebarCollapsed = "open" | "closed";
 export type ShelfData = {
   id: number;
   books: BookProps[];
+  name?: string;
 };
 
 export type EditingBookState = {
@@ -37,6 +39,28 @@ function App() {
   }, [shelves]);
 
   const [editingBook, setEditingBook] = useState<EditingBookState>(null);
+
+  const [editingShelf, setEditingShelf] = useState<ShelfData | null>(null);
+
+  const deleteShelf = () => {
+    if (!editingShelf) return;
+
+    // .filter keeps every shelf EXCEPT the one that matches the ID I want to delete
+    setShelves((prevShelves) =>
+      prevShelves.filter((s) => s.id !== editingShelf.id),
+    );
+    setEditingShelf(null);
+  };
+
+  const saveEditedShelf = () => {
+    if (!editingShelf) return;
+
+    // .map finds the specific shelf and swaps it out with our newly edited version
+    setShelves((prevShelves) =>
+      prevShelves.map((s) => (s.id === editingShelf.id ? editingShelf : s)),
+    );
+    setEditingShelf(null);
+  };
 
   const headerTitle = mode === "edit" ? "Library Editor" : "Your Library";
 
@@ -116,9 +140,11 @@ function App() {
         {shelves.map((shelf) => (
           <Shelf
             key={shelf.id}
+            name={shelf.name}
             books={shelf.books}
             mode={mode}
             onAddBook={() => addBookToShelf(shelf.id)}
+            onEditShelf={() => setEditingShelf(shelf)}
             onBookClick={(bookIndex) =>
               setEditingBook({
                 shelfId: shelf.id,
@@ -135,6 +161,14 @@ function App() {
           setEditingBook={setEditingBook}
           saveEditedBook={saveEditedBook}
           deleteBook={deleteBook}
+        />
+      )}
+      {editingShelf && (
+        <ShelfModal
+          editingShelf={editingShelf}
+          setEditingShelf={setEditingShelf}
+          saveEditedShelf={saveEditedShelf}
+          deleteShelf={deleteShelf}
         />
       )}
     </Layout>

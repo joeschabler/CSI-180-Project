@@ -7,6 +7,8 @@ interface ShelfProps {
   mode: AppMode;
   onAddBook: () => void;
   onBookClick: (bookIndex: number) => void;
+  onEditShelf: () => void;
+  name?: string;
 }
 
 export const Shelf: FC<ShelfProps> = ({
@@ -14,6 +16,8 @@ export const Shelf: FC<ShelfProps> = ({
   mode,
   onAddBook,
   onBookClick,
+  onEditShelf,
+  name,
 }) => {
   return (
     <div
@@ -24,6 +28,36 @@ export const Shelf: FC<ShelfProps> = ({
         marginBottom: "2rem",
       }}
     >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "10px",
+          padding: "0 10px",
+        }}
+      >
+        <h2 style={{ margin: 0, fontSize: "1.5rem", color: "#ffffff" }}>
+          {name || "Untitled Shelf"}
+        </h2>
+
+        {mode === "edit" && (
+          <button
+            onClick={onEditShelf}
+            style={{
+              padding: "6px 12px",
+              backgroundColor: "#58acff",
+              color: "white",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "0.85rem",
+              fontWeight: "bold",
+            }}
+          >
+            ⚙️ Edit Shelf
+          </button>
+        )}
+      </div>
       <div
         style={{
           borderBottom: "8px solid white",
