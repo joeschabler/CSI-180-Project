@@ -127,6 +127,37 @@ function App() {
     setEditingBook(null);
   };
 
+  const moveBook = (direction: "left" | "right") => {
+    if (!editingBook) return;
+
+    const currentShelf = shelves.find((s) => s.id === editingBook.shelfId);
+    if (!currentShelf) return;
+
+    const currentIndex = editingBook.bookIndex;
+    const targetIndex =
+      direction === "left" ? currentIndex - 1 : currentIndex + 1;
+
+    if (targetIndex < 0 || targetIndex >= currentShelf.books.length) return;
+
+    const newBooks = [...currentShelf.books];
+    const temp = newBooks[currentIndex];
+    newBooks[currentIndex] = newBooks[targetIndex];
+    newBooks[targetIndex] = temp;
+
+    setShelves((prevShelves) =>
+      prevShelves.map((shelf) =>
+        shelf.id === editingBook.shelfId
+          ? { ...shelf, books: newBooks }
+          : shelf,
+      ),
+    );
+
+    setEditingBook({
+      ...editingBook,
+      bookIndex: targetIndex,
+    });
+  };
+
   return (
     <Layout
       title={headerTitle}
@@ -161,6 +192,7 @@ function App() {
           setEditingBook={setEditingBook}
           saveEditedBook={saveEditedBook}
           deleteBook={deleteBook}
+          moveBook={moveBook}
         />
       )}
       {editingShelf && (

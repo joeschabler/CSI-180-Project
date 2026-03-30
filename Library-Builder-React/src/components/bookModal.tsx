@@ -6,6 +6,7 @@ interface BookModalProps {
   setEditingBook: (state: EditingBookState) => void;
   saveEditedBook: () => void;
   deleteBook: () => void;
+  moveBook: (direction: "left" | "right") => void;
 }
 
 export const EditModal: FC<BookModalProps> = ({
@@ -13,6 +14,7 @@ export const EditModal: FC<BookModalProps> = ({
   setEditingBook,
   saveEditedBook,
   deleteBook,
+  moveBook,
 }) => {
   return (
     <div
@@ -44,15 +46,45 @@ export const EditModal: FC<BookModalProps> = ({
           overflowY: "auto",
         }}
       >
-        <h2
+        <div
           style={{
-            margin: "0 0 10px 0",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
             borderBottom: "2px solid #58acff",
             paddingBottom: "8px",
+            marginBottom: "10px",
           }}
         >
-          Edit Book
-        </h2>
+          <h2 style={{ margin: 0 }}>Edit Book</h2>
+
+          <div style={{ display: "flex", gap: "5px" }}>
+            <button
+              onClick={() => moveBook("left")}
+              style={{
+                padding: "4px 8px",
+                cursor: "pointer",
+                background: "#f0f0f0",
+                border: "1px solid #ccc",
+                borderRadius: "4px",
+              }}
+            >
+              ⬅️
+            </button>
+            <button
+              onClick={() => moveBook("right")}
+              style={{
+                padding: "4px 8px",
+                cursor: "pointer",
+                background: "#f0f0f0",
+                border: "1px solid #ccc",
+                borderRadius: "4px",
+              }}
+            >
+              ➡️
+            </button>
+          </div>
+        </div>
 
         <label
           style={{
