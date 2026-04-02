@@ -1,6 +1,7 @@
 import type { FC } from "react";
 
 export interface BookProps {
+  id: string; // required for dragging books
   title?: string;
   color?: string;
   height?: string;

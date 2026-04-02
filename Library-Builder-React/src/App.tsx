@@ -5,6 +5,15 @@ import { Shelf } from "./components/shelf";
 import type { BookProps } from "./components/book";
 import { EditModal } from "./components/bookModal";
 import { ShelfModal } from "./components/shelfModal";
+import {
+  DndContext,
+  closestCenter,
+  type DragEndEvent,
+  useSensor,
+  useSensors,
+  PointerSensor,
+} from "@dnd-kit/core";
+import { arrayMove } from "@dnd-kit/sortable";
 
 export type AppMode = "edit" | "content";
 export type sidebarCollapsed = "open" | "closed";
@@ -75,6 +84,7 @@ function App() {
     const randomColor = "#" + Math.floor(Math.random() * 16777215).toString(16);
 
     const newBook: BookProps = {
+      id: crypto.randomUUID(), // gives book randomly assigned id
       title: "New Book",
       color: randomColor,
       height: randomHeight,
@@ -158,6 +168,36 @@ function App() {
     });
   };
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    // if not dropped in a valid space do nothing
+    if (!over || active.id === over.id) return;
+
+    setShelves((prevShelves) =>
+      prevShelves.map((shelf) => {
+        const oldIndex = shelf.books.findIndex((b) => b.id === active.id);
+        const newIndex = shelf.books.findIndex((b) => b.id === over.id);
+        // if books exist on same shelf swap them using dnd-kit's arrayMove
+        if (oldIndex !== -1 && newIndex !== -1) {
+          return {
+            ...shelf,
+            books: arrayMove(shelf.books, oldIndex, newIndex),
+          };
+        }
+        return shelf;
+      }),
+    );
+  };
+
   return (
     <Layout
       title={headerTitle}
@@ -168,23 +208,29 @@ function App() {
       onAddShelf={addNewShelf}
     >
       <div style={{ paddingBottom: "2rem" }}>
-        {shelves.map((shelf) => (
-          <Shelf
-            key={shelf.id}
-            name={shelf.name}
-            books={shelf.books}
-            mode={mode}
-            onAddBook={() => addBookToShelf(shelf.id)}
-            onEditShelf={() => setEditingShelf(shelf)}
-            onBookClick={(bookIndex) =>
-              setEditingBook({
-                shelfId: shelf.id,
-                bookIndex: bookIndex,
-                bookData: shelf.books[bookIndex],
-              })
-            }
-          />
-        ))}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          {shelves.map((shelf) => (
+            <Shelf
+              key={shelf.id}
+              name={shelf.name}
+              books={shelf.books}
+              mode={mode}
+              onAddBook={() => addBookToShelf(shelf.id)}
+              onEditShelf={() => setEditingShelf(shelf)}
+              onBookClick={(bookIndex) =>
+                setEditingBook({
+                  shelfId: shelf.id,
+                  bookIndex: bookIndex,
+                  bookData: shelf.books[bookIndex],
+                })
+              }
+            />
+          ))}
+        </DndContext>
       </div>
       {editingBook && (
         <EditModal

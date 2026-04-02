@@ -1,6 +1,11 @@
 import type { FC } from "react";
 import { Book, type BookProps } from "./book";
 import type { AppMode } from "../App";
+import {
+  SortableContext,
+  horizontalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { SortableBook } from "./sortableBook";
 
 interface ShelfProps {
   books: BookProps[];
@@ -73,20 +78,27 @@ export const Shelf: FC<ShelfProps> = ({
           backgroundColor: "rgba(0,0,0,0.02)",
         }}
       >
-        {books.map((book, index) => (
-          <Book
-            key={index} // In the future, this should be book.id or book.isbn
-            title={book.title}
-            color={book.color}
-            height={book.height}
-            width={book.width}
-            isbn={book.isbn}
-            pageCount={book.pageCount}
-            coverArt={book.coverArt}
-            edition={book.edition}
-            onClick={mode === "edit" ? () => onBookClick(index) : undefined}
-          />
-        ))}
+        <SortableContext
+          items={books.map((b) => b.id)}
+          strategy={horizontalListSortingStrategy}
+        >
+          {books.map((book, index) => (
+            <SortableBook
+              key={book.id}
+              id={book.id}
+              disabled={mode !== "edit"} // disables dragging if not in edit
+              title={book.title}
+              color={book.color}
+              height={book.height}
+              width={book.width}
+              isbn={book.isbn}
+              pageCount={book.pageCount}
+              coverArt={book.coverArt}
+              edition={book.edition}
+              onClick={mode === "edit" ? () => onBookClick(index) : undefined}
+            />
+          ))}
+        </SortableContext>
       </div>
       {mode === "edit" && (
         <button
