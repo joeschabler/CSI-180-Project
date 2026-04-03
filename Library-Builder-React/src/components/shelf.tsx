@@ -69,6 +69,10 @@ export const Shelf: FC<ShelfProps> = ({
       window.removeEventListener("mouseup", handleMouseUp);
     };
   }, [isResizing, startX, startWidth, width, onUpdateWidth]);
+
+  // Custom Tooltip State
+  const [isHoveringTitle, setIsHoveringTitle] = useState(false);
+
   return (
     <div
       style={{
@@ -79,7 +83,6 @@ export const Shelf: FC<ShelfProps> = ({
         marginBottom: "2rem",
       }}
     >
-      {/* 🟢 THE RESIZE HANDLE */}
       {mode === "edit" && (
         <div
           onMouseDown={handleMouseDown}
@@ -107,14 +110,54 @@ export const Shelf: FC<ShelfProps> = ({
           padding: "0 10px",
         }}
       >
-        <h2 style={{ margin: 0, fontSize: "1.5rem", color: "#ffffff" }}>
-          {name || "Untitled Shelf"}
-        </h2>
+        <div
+          onMouseEnter={() => setIsHoveringTitle(true)}
+          onMouseLeave={() => setIsHoveringTitle(false)}
+          style={{ position: "relative", maxWidth: "calc(100% - 110px)" }} // Prevents text from hitting the button
+        >
+          <h2
+            style={{
+              margin: 0,
+              fontSize: "1.5rem",
+              color: "#ffffff",
+              paddingRight: "15px",
+
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {name || "Untitled Shelf"}
+          </h2>
+
+          {isHoveringTitle && (
+            <div
+              style={{
+                position: "absolute",
+                top: "-35px", // Floats perfectly above the title
+                left: "0",
+                backgroundColor: "#333",
+                color: "#fff",
+                padding: "6px 10px",
+                borderRadius: "6px",
+                fontSize: "0.85rem",
+                fontWeight: "normal",
+                whiteSpace: "nowrap",
+                zIndex: 100, // Forces it to the very front
+                boxShadow: "0px 4px 10px rgba(0,0,0,0.3)",
+                pointerEvents: "none", // Prevents the tooltip itself from glitching the hover state
+              }}
+            >
+              {name || "Untitled Shelf"}
+            </div>
+          )}
+        </div>
 
         {mode === "edit" && (
           <button
             onClick={onEditShelf}
             style={{
+              flexShrink: 0, // Prevents a massive title from crushing the button
               padding: "6px 12px",
               backgroundColor: "#58acff",
               color: "white",
