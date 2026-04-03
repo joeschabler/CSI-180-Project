@@ -1,4 +1,4 @@
-import type { FC } from "react";
+import { useState, useEffect, type FC } from "react";
 import { Book, type BookProps } from "./book";
 import type { AppMode } from "../App";
 import {
@@ -14,6 +14,8 @@ interface ShelfProps {
   onBookClick: (bookIndex: number) => void;
   onEditShelf: () => void;
   name?: string;
+  width?: number;
+  onUpdateWidth?: (newWidth: number) => void;
 }
 
 export const Shelf: FC<ShelfProps> = ({
@@ -23,16 +25,79 @@ export const Shelf: FC<ShelfProps> = ({
   onBookClick,
   onEditShelf,
   name,
+  width = 450,
+  onUpdateWidth,
 }) => {
+  const [isResizing, setIsResizing] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [startWidth, setStartWidth] = useState(width);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (mode !== "edit") return;
+    setIsResizing(true);
+    setStartX(e.clientX);
+    setStartWidth(width);
+    e.preventDefault(); // Stops the screen from highlighting text while you drag!
+  };
+
+  useEffect(() => {
+    if (!isResizing) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const deltaX = e.clientX - startX;
+      let newWidth = startWidth + deltaX;
+
+      newWidth = Math.round(newWidth / 20) * 20;
+
+      if (newWidth < 200) newWidth = 200;
+      if (newWidth > 2000) newWidth = 2000;
+
+      if (onUpdateWidth && newWidth !== width) {
+        onUpdateWidth(newWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isResizing, startX, startWidth, width, onUpdateWidth]);
   return (
     <div
       style={{
+        position: "relative",
         display: "flex",
         flexDirection: "column",
-        width: "fit-content",
+        width: `${width}px`,
         marginBottom: "2rem",
       }}
     >
+      {/* 🟢 THE RESIZE HANDLE */}
+      {mode === "edit" && (
+        <div
+          onMouseDown={handleMouseDown}
+          style={{
+            position: "absolute",
+            right: "-10px",
+            top: 0,
+            bottom: 0,
+            width: "20px",
+            cursor: "col-resize",
+            zIndex: 10,
+            backgroundColor: isResizing
+              ? "rgba(88, 172, 255, 0.2)"
+              : "transparent",
+            transition: "background-color 0.2s",
+          }}
+        />
+      )}
       <div
         style={{
           display: "flex",

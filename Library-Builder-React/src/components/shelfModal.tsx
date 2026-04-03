@@ -77,6 +77,29 @@ export const ShelfModal: FC<ShelfModalProps> = ({
             })
           }
         />
+        <label
+          style={{ fontWeight: "bold", fontSize: "0.85rem", marginTop: "10px" }}
+        >
+          Shelf Width (px)
+        </label>
+        <input
+          type="number"
+          step="50"
+          min="200"
+          style={{
+            padding: "8px",
+            borderRadius: "4px",
+            border: "1px solid #ccc",
+            fontSize: "1rem",
+          }}
+          value={editingShelf.width || 450}
+          onChange={(e) =>
+            setEditingShelf({
+              ...editingShelf,
+              width: Number(e.target.value),
+            })
+          }
+        />
         <div
           style={{
             display: "flex",

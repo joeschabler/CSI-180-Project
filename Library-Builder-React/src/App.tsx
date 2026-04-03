@@ -22,6 +22,7 @@ export type ShelfData = {
   id: number;
   books: BookProps[];
   name?: string;
+  width?: number;
 };
 
 export type EditingBookState = {
@@ -69,6 +70,14 @@ function App() {
       prevShelves.map((s) => (s.id === editingShelf.id ? editingShelf : s)),
     );
     setEditingShelf(null);
+  };
+
+  const updateShelfWidth = (shelfId: number, newWidth: number) => {
+    setShelves((prevShelves) =>
+      prevShelves.map((s) =>
+        s.id === shelfId ? { ...s, width: newWidth } : s,
+      ),
+    );
   };
 
   const headerTitle = mode === "edit" ? "Library Editor" : "Your Library";
@@ -207,7 +216,15 @@ function App() {
       setMode={setMode}
       onAddShelf={addNewShelf}
     >
-      <div style={{ paddingBottom: "2rem" }}>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "2rem",
+          alignItems: "flex-start",
+          paddingBottom: "2rem",
+        }}
+      >
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -217,6 +234,8 @@ function App() {
             <Shelf
               key={shelf.id}
               name={shelf.name}
+              width={shelf.width}
+              onUpdateWidth={(newWidth) => updateShelfWidth(shelf.id, newWidth)}
               books={shelf.books}
               mode={mode}
               onAddBook={() => addBookToShelf(shelf.id)}
