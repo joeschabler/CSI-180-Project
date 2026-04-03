@@ -13,6 +13,8 @@ interface LayoutProps {
   mode: AppMode;
   setMode: (mode: AppMode) => void;
   onAddShelf: () => void;
+  exportLibrary: () => void;
+  importLibrary: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const Layout = ({
@@ -23,6 +25,8 @@ const Layout = ({
   mode,
   setMode,
   onAddShelf,
+  exportLibrary,
+  importLibrary,
 }: LayoutProps) => {
   return (
     <div
@@ -57,6 +61,8 @@ const Layout = ({
             mode={mode}
             setMode={setMode}
             onAddShelf={onAddShelf}
+            exportLibrary={exportLibrary}
+            importLibrary={importLibrary}
           />
         </div>
 

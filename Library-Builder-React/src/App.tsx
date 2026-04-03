@@ -62,6 +62,41 @@ function App() {
     setEditingShelf(null);
   };
 
+  const exportLibrary = () => {
+    const dataStr = JSON.stringify(shelves, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "my-library-backup.json";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const importLibrary = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const importedData = JSON.parse(e.target?.result as string);
+        if (Array.isArray(importedData)) {
+          setShelves(importedData);
+        } else {
+          alert("Invalid backup file format!");
+        }
+      } catch (error) {
+        alert("Error reading file.");
+      }
+    };
+    reader.readAsText(file);
+
+    event.target.value = "";
+  };
+
   const saveEditedShelf = () => {
     if (!editingShelf) return;
 
@@ -215,6 +250,8 @@ function App() {
       mode={mode}
       setMode={setMode}
       onAddShelf={addNewShelf}
+      exportLibrary={exportLibrary}
+      importLibrary={importLibrary}
     >
       <div
         style={{

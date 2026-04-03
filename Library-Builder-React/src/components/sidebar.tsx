@@ -7,6 +7,8 @@ interface SidebarProps {
   mode: AppMode;
   setMode: (mode: AppMode) => void;
   onAddShelf: () => void;
+  exportLibrary: () => void;
+  importLibrary: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export const Sidebar: FC<SidebarProps> = ({
@@ -15,6 +17,8 @@ export const Sidebar: FC<SidebarProps> = ({
   mode,
   setMode,
   onAddShelf,
+  exportLibrary,
+  importLibrary,
 }) => {
   return (
     <aside
@@ -82,6 +86,57 @@ export const Sidebar: FC<SidebarProps> = ({
             )}
           </ul>
         </nav>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "10px",
+          marginTop: "20px",
+        }}
+      >
+        <button
+          onClick={exportLibrary}
+          style={{
+            background: "black",
+            color: "white",
+            border: "none",
+            padding: "8px",
+            cursor: "pointer",
+            borderRadius: "4px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: status === "open" ? "flex-start" : "center",
+            gap: "8px",
+            fontWeight: "bold",
+          }}
+        >
+          💾 {status === "open" && <span>Backup Library</span>}
+        </button>
+
+        <label
+          style={{
+            background: "white",
+            color: "black",
+            border: "none",
+            padding: "8px",
+            cursor: "pointer",
+            borderRadius: "4px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: status === "open" ? "flex-start" : "center",
+            gap: "8px",
+            fontWeight: "bold",
+          }}
+        >
+          📂 {status === "open" && <span>Load Backup</span>}
+          <input
+            type="file"
+            accept=".json"
+            style={{ display: "none" }}
+            onChange={importLibrary}
+          />
+        </label>
       </div>
     </aside>
   );
