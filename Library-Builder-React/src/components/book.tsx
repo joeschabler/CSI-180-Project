@@ -4,8 +4,8 @@ export interface BookProps {
   id: string; // required for dragging books
   title?: string;
   color?: string;
-  height?: string;
-  width?: string;
+  height?: number;
+  width?: number;
   isbn?: string;
   pageCount?: number;
   coverArt?: string;

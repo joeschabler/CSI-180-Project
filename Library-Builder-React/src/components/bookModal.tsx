@@ -146,6 +146,8 @@ export const EditModal: FC<BookModalProps> = ({
           Height (px)
         </label>
         <input
+          type="number"
+          step="1"
           style={{
             padding: "8px",
             borderRadius: "4px",
@@ -156,7 +158,10 @@ export const EditModal: FC<BookModalProps> = ({
           onChange={(e) =>
             setEditingBook({
               ...editingBook,
-              bookData: { ...editingBook.bookData, height: e.target.value },
+              bookData: {
+                ...editingBook.bookData,
+                height: Number(e.target.value),
+              },
             })
           }
         />
@@ -171,6 +176,8 @@ export const EditModal: FC<BookModalProps> = ({
           Width (px)
         </label>
         <input
+          type="number"
+          step="1"
           style={{
             padding: "8px",
             borderRadius: "4px",
@@ -181,7 +188,10 @@ export const EditModal: FC<BookModalProps> = ({
           onChange={(e) =>
             setEditingBook({
               ...editingBook,
-              bookData: { ...editingBook.bookData, width: e.target.value },
+              bookData: {
+                ...editingBook.bookData,
+                width: Number(e.target.value),
+              },
             })
           }
         />

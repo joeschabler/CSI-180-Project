@@ -122,9 +122,8 @@ function App() {
   };
 
   const addBookToShelf = (shelfId: number) => {
-    const randomHeight =
-      Math.floor(Math.random() * (140 - 100 + 1) + 100) + "px";
-    const randomWidth = Math.floor(Math.random() * (50 - 20 + 1) + 20) + "px";
+    const randomHeight = Math.floor(Math.random() * (140 - 100 + 1) + 100);
+    const randomWidth = Math.floor(Math.random() * (50 - 20 + 1) + 20);
     const randomColor = "#" + Math.floor(Math.random() * 16777215).toString(16);
 
     const newBook: BookProps = {
