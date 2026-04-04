@@ -15,6 +15,18 @@ interface LayoutProps {
   onAddShelf: () => void;
   exportLibrary: () => void;
   importLibrary: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  useRandomBooks: boolean;
+  setUseRandomBooks: (val: boolean) => void;
+  defaultBookHeight: number;
+  setDefaultBookHeight: (val: number) => void;
+  defaultBookWidth: number;
+  setDefaultBookWidth: (val: number) => void;
+  defaultBookColor: string;
+  setDefaultBookColor: (val: string) => void;
+  clearLibrary: () => void;
+  devOptionsEnabled: boolean;
+  setDevOptionsEnabled: (val: boolean) => void;
+  hardResetSite: () => void;
 }
 
 const Layout = ({
@@ -27,6 +39,18 @@ const Layout = ({
   onAddShelf,
   exportLibrary,
   importLibrary,
+  useRandomBooks,
+  setUseRandomBooks,
+  defaultBookHeight,
+  setDefaultBookHeight,
+  defaultBookWidth,
+  setDefaultBookWidth,
+  defaultBookColor,
+  setDefaultBookColor,
+  clearLibrary,
+  devOptionsEnabled,
+  setDevOptionsEnabled,
+  hardResetSite,
 }: LayoutProps) => {
   return (
     <div
@@ -63,6 +87,18 @@ const Layout = ({
             onAddShelf={onAddShelf}
             exportLibrary={exportLibrary}
             importLibrary={importLibrary}
+            useRandomBooks={useRandomBooks}
+            setUseRandomBooks={setUseRandomBooks}
+            defaultBookHeight={defaultBookHeight}
+            setDefaultBookHeight={setDefaultBookHeight}
+            defaultBookWidth={defaultBookWidth}
+            setDefaultBookWidth={setDefaultBookWidth}
+            defaultBookColor={defaultBookColor}
+            setDefaultBookColor={setDefaultBookColor}
+            clearLibrary={clearLibrary}
+            devOptionsEnabled={devOptionsEnabled}
+            setDevOptionsEnabled={setDevOptionsEnabled}
+            hardResetSite={hardResetSite}
           />
         </div>
 

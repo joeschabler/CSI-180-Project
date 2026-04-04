@@ -43,6 +43,20 @@ function App() {
 
     return [{ id: 1, books: [] }];
   });
+  // setting menu state
+  const [useRandomBooks, setUseRandomBooks] = useState(true);
+
+  const [defaultBookHeight, setDefaultBookHeight] = useState(130);
+  const [defaultBookWidth, setDefaultBookWidth] = useState(35);
+  const [defaultBookColor, setDefaultBookColor] = useState("#404040");
+
+  // DEV OPTIONS STATE
+  const [devOptionsEnabled, setDevOptionsEnabled] = useState(false);
+
+  const hardResetSite = () => {
+    localStorage.clear();
+    window.location.reload();
+  };
 
   useEffect(() => {
     localStorage.setItem("library-shelves", JSON.stringify(shelves));
@@ -117,14 +131,24 @@ function App() {
 
   const headerTitle = mode === "edit" ? "Library Editor" : "Your Library";
 
+  const clearLibrary = () => {
+    setShelves([{ id: 1, books: [] }]);
+  };
+
   const addNewShelf = () => {
     setShelves([...shelves, { id: Date.now(), books: [] }]);
   };
 
   const addBookToShelf = (shelfId: number) => {
-    const randomHeight = Math.floor(Math.random() * (140 - 100 + 1) + 100);
-    const randomWidth = Math.floor(Math.random() * (50 - 20 + 1) + 20);
-    const randomColor = "#" + Math.floor(Math.random() * 16777215).toString(16);
+    const randomHeight = useRandomBooks
+      ? Math.floor(Math.random() * (140 - 100 + 1) + 100)
+      : defaultBookHeight;
+    const randomWidth = useRandomBooks
+      ? Math.floor(Math.random() * (50 - 20 + 1) + 20)
+      : defaultBookWidth;
+    const randomColor = useRandomBooks
+      ? "#" + Math.floor(Math.random() * 16777215).toString(16)
+      : defaultBookColor;
 
     const newBook: BookProps = {
       id: crypto.randomUUID(), // gives book randomly assigned id
@@ -251,6 +275,18 @@ function App() {
       onAddShelf={addNewShelf}
       exportLibrary={exportLibrary}
       importLibrary={importLibrary}
+      useRandomBooks={useRandomBooks}
+      setUseRandomBooks={setUseRandomBooks}
+      defaultBookHeight={defaultBookHeight}
+      setDefaultBookHeight={setDefaultBookHeight}
+      defaultBookWidth={defaultBookWidth}
+      setDefaultBookWidth={setDefaultBookWidth}
+      defaultBookColor={defaultBookColor}
+      setDefaultBookColor={setDefaultBookColor}
+      clearLibrary={clearLibrary}
+      devOptionsEnabled={devOptionsEnabled}
+      setDevOptionsEnabled={setDevOptionsEnabled}
+      hardResetSite={hardResetSite}
     >
       <div
         style={{
