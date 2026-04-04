@@ -4,10 +4,13 @@ import type { AppMode } from "../App";
 import {
   SortableContext,
   horizontalListSortingStrategy,
+  useSortable,
 } from "@dnd-kit/sortable";
 import { SortableBook } from "./sortableBook";
+import { CSS } from "@dnd-kit/utilities";
 
 interface ShelfProps {
+  id: number;
   books: BookProps[];
   mode: AppMode;
   onAddBook: () => void;
@@ -27,10 +30,28 @@ export const Shelf: FC<ShelfProps> = ({
   name,
   width = 450,
   onUpdateWidth,
+  id,
 }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: id });
+
   const [isResizing, setIsResizing] = useState(false);
   const [startX, setStartX] = useState(0);
   const [startWidth, setStartWidth] = useState(width);
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition: isDragging ? "none" : transition, // Disables transition while dragging for instant response
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 999 : 1,
+    boxShadow: isDragging ? "0 10px 20px rgba(0,0,0,0.3)" : "none", // Adds a "lift" effect
+  };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (mode !== "edit") return;
@@ -75,12 +96,15 @@ export const Shelf: FC<ShelfProps> = ({
 
   return (
     <div
+      ref={setNodeRef}
       style={{
+        ...style,
         position: "relative",
         display: "flex",
         flexDirection: "column",
         width: `${width}px`,
-        marginBottom: "2rem",
+        maxWidth: "100%",
+        boxSizing: "border-box",
       }}
     >
       {mode === "edit" && (
@@ -102,7 +126,10 @@ export const Shelf: FC<ShelfProps> = ({
         />
       )}
       <div
+        {...attributes}
+        {...listeners}
         style={{
+          cursor: mode === "edit" ? "grab" : "default",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",

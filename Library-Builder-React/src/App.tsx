@@ -12,8 +12,13 @@ import {
   useSensor,
   useSensors,
   PointerSensor,
+  pointerWithin,
 } from "@dnd-kit/core";
-import { arrayMove } from "@dnd-kit/sortable";
+import {
+  arrayMove,
+  SortableContext,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
 
 export type AppMode = "edit" | "content";
 export type sidebarCollapsed = "open" | "closed";
@@ -246,14 +251,26 @@ function App() {
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    // if not dropped in a valid space do nothing
     if (!over || active.id === over.id) return;
 
+    // Check if we are dragging a SHELF
+    const isActiveShelf = shelves.some((s) => s.id === active.id);
+
+    if (isActiveShelf) {
+      setShelves((prevShelves) => {
+        const oldIndex = prevShelves.findIndex((s) => s.id === active.id);
+        const newIndex = prevShelves.findIndex((s) => s.id === over.id);
+        return arrayMove(prevShelves, oldIndex, newIndex);
+      });
+      return; // Stop here, do not run the book logic!
+    }
+
+    // If not, use BOOK logic
     setShelves((prevShelves) =>
       prevShelves.map((shelf) => {
         const oldIndex = shelf.books.findIndex((b) => b.id === active.id);
         const newIndex = shelf.books.findIndex((b) => b.id === over.id);
-        // if books exist on same shelf swap them using dnd-kit's arrayMove
+
         if (oldIndex !== -1 && newIndex !== -1) {
           return {
             ...shelf,
@@ -299,28 +316,36 @@ function App() {
       >
         <DndContext
           sensors={sensors}
-          collisionDetection={closestCenter}
+          collisionDetection={pointerWithin}
           onDragEnd={handleDragEnd}
         >
-          {shelves.map((shelf) => (
-            <Shelf
-              key={shelf.id}
-              name={shelf.name}
-              width={shelf.width}
-              onUpdateWidth={(newWidth) => updateShelfWidth(shelf.id, newWidth)}
-              books={shelf.books}
-              mode={mode}
-              onAddBook={() => addBookToShelf(shelf.id)}
-              onEditShelf={() => setEditingShelf(shelf)}
-              onBookClick={(bookIndex) =>
-                setEditingBook({
-                  shelfId: shelf.id,
-                  bookIndex: bookIndex,
-                  bookData: shelf.books[bookIndex],
-                })
-              }
-            />
-          ))}
+          <SortableContext
+            items={shelves.map((s) => s.id)}
+            strategy={rectSortingStrategy}
+          >
+            {shelves.map((shelf) => (
+              <Shelf
+                key={shelf.id}
+                id={shelf.id}
+                name={shelf.name}
+                width={shelf.width}
+                onUpdateWidth={(newWidth) =>
+                  updateShelfWidth(shelf.id, newWidth)
+                }
+                books={shelf.books}
+                mode={mode}
+                onAddBook={() => addBookToShelf(shelf.id)}
+                onEditShelf={() => setEditingShelf(shelf)}
+                onBookClick={(bookIndex) =>
+                  setEditingBook({
+                    shelfId: shelf.id,
+                    bookIndex: bookIndex,
+                    bookData: shelf.books[bookIndex],
+                  })
+                }
+              />
+            ))}
+          </SortableContext>
         </DndContext>
       </div>
       {editingBook && (
