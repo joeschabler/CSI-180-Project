@@ -30,6 +30,10 @@ export type ShelfData = {
   width?: number;
 };
 
+export type LibraryData = {
+  [roomName: string]: ShelfData[];
+};
+
 export type EditingBookState = {
   shelfId: number;
   bookIndex: number;
@@ -39,15 +43,23 @@ export type EditingBookState = {
 function App() {
   const [mode, setMode] = useState<AppMode>("edit");
   const [isCollapsed, setIsCollapsed] = useState<sidebarCollapsed>("open");
-  const [shelves, setShelves] = useState<ShelfData[]>(() => {
-    const savedData = localStorage.getItem("library-shelves");
-
-    if (savedData) {
-      return JSON.parse(savedData);
-    }
-
-    return [{ id: 1, books: [] }];
+  // 🟢 Room States
+  const [currentRoom, setCurrentRoom] = useState<string>("Living Room");
+  const [library, setLibrary] = useState<LibraryData>(() => {
+    const savedData = localStorage.getItem("library-rooms");
+    if (savedData) return JSON.parse(savedData);
+    return { "Living Room": [{ id: 1, books: [] }] };
   });
+
+  // 🟢 Helper for current shelves
+  const shelves = library[currentRoom] || [];
+  const allRooms = Object.keys(library);
+
+  // Persistence
+  useEffect(() => {
+    localStorage.setItem("library-rooms", JSON.stringify(library));
+  }, [library]);
+
   // setting menu state
   const [useRandomBooks, setUseRandomBooks] = useState(true);
 
@@ -58,6 +70,10 @@ function App() {
   // DEV OPTIONS STATE
   const [devOptionsEnabled, setDevOptionsEnabled] = useState(false);
 
+  const [editingBook, setEditingBook] = useState<EditingBookState>(null);
+
+  const [editingShelf, setEditingShelf] = useState<ShelfData | null>(null);
+
   const hardResetSite = () => {
     localStorage.clear();
     window.location.reload();
@@ -67,28 +83,52 @@ function App() {
     localStorage.setItem("library-shelves", JSON.stringify(shelves));
   }, [shelves]);
 
-  const [editingBook, setEditingBook] = useState<EditingBookState>(null);
+  const addRoom = (name: string) => {
+    if (library[name]) return alert("Room already exists!");
+    setLibrary((prev) => ({
+      ...prev,
+      [name]: [{ id: Date.now(), books: [] }],
+    }));
+    setCurrentRoom(name);
+  };
 
-  const [editingShelf, setEditingShelf] = useState<ShelfData | null>(null);
+  const renameRoom = (oldName: string) => {
+    const newName = window.prompt(`Rename "${oldName}" to:`, oldName);
+
+    if (!newName || newName.trim() === "" || newName === oldName) return;
+    if (library[newName]) return alert("A room with that name already exists!");
+
+    setLibrary((prev) => {
+      const newLibrary = { ...prev };
+      // Move the shelves to the new key
+      newLibrary[newName] = newLibrary[oldName];
+      // Delete the old key
+      delete newLibrary[oldName];
+      return newLibrary;
+    });
+
+    // If we renamed the room we are currently looking at, update the pointer
+    if (currentRoom === oldName) {
+      setCurrentRoom(newName);
+    }
+  };
 
   const deleteShelf = () => {
     if (!editingShelf) return;
-
-    // .filter keeps every shelf EXCEPT the one that matches the ID I want to delete
-    setShelves((prevShelves) =>
-      prevShelves.filter((s) => s.id !== editingShelf.id),
-    );
+    setLibrary((prev) => ({
+      ...prev,
+      [currentRoom]: prev[currentRoom].filter((s) => s.id !== editingShelf.id),
+    }));
     setEditingShelf(null);
   };
 
   const exportLibrary = () => {
-    const dataStr = JSON.stringify(shelves, null, 2);
+    const dataStr = JSON.stringify(library, null, 2);
     const blob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-
     const link = document.createElement("a");
     link.href = url;
-    link.download = "my-library-backup.json";
+    link.download = "my-library-rooms-backup.json";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -97,106 +137,111 @@ function App() {
   const importLibrary = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
         const importedData = JSON.parse(e.target?.result as string);
+        // Basic check: is it an object (rooms) or an array (legacy)?
         if (Array.isArray(importedData)) {
-          setShelves(importedData);
+          setLibrary({ "Imported Room": importedData });
+          setCurrentRoom("Imported Room");
         } else {
-          alert("Invalid backup file format!");
+          setLibrary(importedData);
+          setCurrentRoom(Object.keys(importedData)[0]);
         }
       } catch (error) {
         alert("Error reading file.");
       }
     };
     reader.readAsText(file);
-
     event.target.value = "";
   };
 
   const saveEditedShelf = () => {
     if (!editingShelf) return;
-
-    // .map finds the specific shelf and swaps it out with our newly edited version
-    setShelves((prevShelves) =>
-      prevShelves.map((s) => (s.id === editingShelf.id ? editingShelf : s)),
-    );
+    setLibrary((prev) => ({
+      ...prev,
+      [currentRoom]: prev[currentRoom].map((s) =>
+        s.id === editingShelf.id ? editingShelf : s,
+      ),
+    }));
     setEditingShelf(null);
   };
 
   const updateShelfWidth = (shelfId: number, newWidth: number) => {
-    setShelves((prevShelves) =>
-      prevShelves.map((s) =>
+    setLibrary((prev) => ({
+      ...prev,
+      [currentRoom]: prev[currentRoom].map((s) =>
         s.id === shelfId ? { ...s, width: newWidth } : s,
       ),
-    );
+    }));
   };
 
   const headerTitle = mode === "edit" ? "Library Editor" : "Your Library";
 
   const clearLibrary = () => {
-    setShelves([{ id: 1, books: [] }]);
+    setLibrary((prev) => ({
+      ...prev,
+      [currentRoom]: [{ id: Date.now(), books: [] }],
+    }));
   };
 
   const addNewShelf = () => {
-    setShelves([...shelves, { id: Date.now(), books: [] }]);
+    setLibrary((prev) => ({
+      ...prev,
+      [currentRoom]: [...prev[currentRoom], { id: Date.now(), books: [] }],
+    }));
   };
 
   const addBookToShelf = (shelfId: number) => {
     const randomHeight = useRandomBooks
-      ? Math.floor(Math.random() * (140 - 100 + 1) + 100)
+      ? Math.floor(Math.random() * 41 + 100)
       : defaultBookHeight;
     const randomWidth = useRandomBooks
-      ? Math.floor(Math.random() * (50 - 20 + 1) + 20)
+      ? Math.floor(Math.random() * 31 + 20)
       : defaultBookWidth;
     const randomColor = useRandomBooks
       ? "#" + Math.floor(Math.random() * 16777215).toString(16)
       : defaultBookColor;
 
     const newBook: BookProps = {
-      id: crypto.randomUUID(), // gives book randomly assigned id
+      id: crypto.randomUUID(),
       title: "New Book",
       color: randomColor,
       height: randomHeight,
       width: randomWidth,
     };
 
-    setShelves(
-      shelves.map((shelf) =>
-        shelf.id === shelfId
-          ? { ...shelf, books: [...shelf.books, newBook] }
-          : shelf,
+    setLibrary((prev) => ({
+      ...prev,
+      [currentRoom]: prev[currentRoom].map((s) =>
+        s.id === shelfId ? { ...s, books: [...s.books, newBook] } : s,
       ),
-    );
+    }));
   };
 
   const deleteBook = () => {
     if (!editingBook) return;
-
-    setShelves((prevShelves) =>
-      prevShelves.map((shelf) => {
+    setLibrary((prev) => ({
+      ...prev,
+      [currentRoom]: prev[currentRoom].map((shelf) => {
         if (shelf.id === editingBook.shelfId) {
           return {
             ...shelf,
-            books: shelf.books.filter(
-              (_, index) => index !== editingBook.bookIndex,
-            ),
+            books: shelf.books.filter((_, i) => i !== editingBook.bookIndex),
           };
         }
         return shelf;
       }),
-    );
-
+    }));
     setEditingBook(null);
   };
 
   const saveEditedBook = () => {
     if (!editingBook) return;
-
-    setShelves(
-      shelves.map((shelf) => {
+    setLibrary((prev) => ({
+      ...prev,
+      [currentRoom]: prev[currentRoom].map((shelf) => {
         if (shelf.id === editingBook.shelfId) {
           const updatedBooks = [...shelf.books];
           updatedBooks[editingBook.bookIndex] = editingBook.bookData;
@@ -204,87 +249,75 @@ function App() {
         }
         return shelf;
       }),
-    );
-
+    }));
     setEditingBook(null);
   };
 
   const moveBook = (direction: "left" | "right") => {
     if (!editingBook) return;
-
     const currentShelf = shelves.find((s) => s.id === editingBook.shelfId);
     if (!currentShelf) return;
-
     const currentIndex = editingBook.bookIndex;
     const targetIndex =
       direction === "left" ? currentIndex - 1 : currentIndex + 1;
-
     if (targetIndex < 0 || targetIndex >= currentShelf.books.length) return;
 
     const newBooks = [...currentShelf.books];
-    const temp = newBooks[currentIndex];
-    newBooks[currentIndex] = newBooks[targetIndex];
-    newBooks[targetIndex] = temp;
+    [newBooks[currentIndex], newBooks[targetIndex]] = [
+      newBooks[targetIndex],
+      newBooks[currentIndex],
+    ];
 
-    setShelves((prevShelves) =>
-      prevShelves.map((shelf) =>
-        shelf.id === editingBook.shelfId
-          ? { ...shelf, books: newBooks }
-          : shelf,
+    setLibrary((prev) => ({
+      ...prev,
+      [currentRoom]: prev[currentRoom].map((s) =>
+        s.id === editingBook.shelfId ? { ...s, books: newBooks } : s,
       ),
-    );
-
-    setEditingBook({
-      ...editingBook,
-      bookIndex: targetIndex,
-    });
+    }));
+    setEditingBook({ ...editingBook, bookIndex: targetIndex });
   };
 
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 5,
-      },
-    }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
   );
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-
     if (!over || active.id === over.id) return;
 
-    // Check if we are dragging a SHELF
     const isActiveShelf = shelves.some((s) => s.id === active.id);
 
-    if (isActiveShelf) {
-      setShelves((prevShelves) => {
-        const oldIndex = prevShelves.findIndex((s) => s.id === active.id);
-        const newIndex = prevShelves.findIndex((s) => s.id === over.id);
-        return arrayMove(prevShelves, oldIndex, newIndex);
-      });
-      return; // Stop here, do not run the book logic!
-    }
+    setLibrary((prev) => {
+      const roomShelves = [...prev[currentRoom]];
+      if (isActiveShelf) {
+        const oldIdx = roomShelves.findIndex((s) => s.id === active.id);
+        const newIdx = roomShelves.findIndex((s) => s.id === over.id);
+        return {
+          ...prev,
+          [currentRoom]: arrayMove(roomShelves, oldIdx, newIdx),
+        };
+      }
 
-    // If not, use BOOK logic
-    setShelves((prevShelves) =>
-      prevShelves.map((shelf) => {
-        const oldIndex = shelf.books.findIndex((b) => b.id === active.id);
-        const newIndex = shelf.books.findIndex((b) => b.id === over.id);
-
-        if (oldIndex !== -1 && newIndex !== -1) {
-          return {
-            ...shelf,
-            books: arrayMove(shelf.books, oldIndex, newIndex),
-          };
-        }
-        return shelf;
-      }),
-    );
+      return {
+        ...prev,
+        [currentRoom]: roomShelves.map((shelf) => {
+          const oldIndex = shelf.books.findIndex((b) => b.id === active.id);
+          const newIndex = shelf.books.findIndex((b) => b.id === over.id);
+          if (oldIndex !== -1 && newIndex !== -1) {
+            return {
+              ...shelf,
+              books: arrayMove(shelf.books, oldIndex, newIndex),
+            };
+          }
+          return shelf;
+        }),
+      };
+    });
   };
 
   return (
     <Layout
-      title={headerTitle}
+      title={`${mode === "edit" ? "Library Editor" : "Your Library"} - ${currentRoom}`}
       sidebarStatus={isCollapsed}
       setSidebarStatus={setIsCollapsed}
       mode={mode}
@@ -304,6 +337,12 @@ function App() {
       devOptionsEnabled={devOptionsEnabled}
       setDevOptionsEnabled={setDevOptionsEnabled}
       hardResetSite={hardResetSite}
+      // Room Props for Sidebar
+      currentRoom={currentRoom}
+      setCurrentRoom={setCurrentRoom}
+      allRooms={allRooms}
+      addRoom={addRoom}
+      renameRoom={renameRoom}
     >
       <div
         style={{
@@ -339,7 +378,7 @@ function App() {
                 onBookClick={(bookIndex) =>
                   setEditingBook({
                     shelfId: shelf.id,
-                    bookIndex: bookIndex,
+                    bookIndex,
                     bookData: shelf.books[bookIndex],
                   })
                 }
@@ -368,4 +407,5 @@ function App() {
     </Layout>
   );
 }
+
 export default App;

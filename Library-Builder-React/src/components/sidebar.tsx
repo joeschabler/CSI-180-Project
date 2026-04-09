@@ -22,6 +22,11 @@ interface SidebarProps {
   devOptionsEnabled: boolean;
   setDevOptionsEnabled: (val: boolean) => void;
   hardResetSite: () => void;
+  currentRoom: string;
+  setCurrentRoom: (name: string) => void;
+  allRooms: string[];
+  addRoom: (name: string) => void;
+  renameRoom: (newName: string) => void;
 }
 
 export const Sidebar: FC<SidebarProps> = ({
@@ -44,9 +49,15 @@ export const Sidebar: FC<SidebarProps> = ({
   devOptionsEnabled,
   setDevOptionsEnabled,
   hardResetSite,
+  currentRoom,
+  setCurrentRoom,
+  allRooms,
+  addRoom,
+  renameRoom,
 }) => {
   const [isSettingsExpanded, setIsSettingsExpanded] = useState(false);
   const [clearStep, setClearStep] = useState(0);
+  const [isRoomsExpanded, setIsRoomsExpanded] = useState(false);
   return (
     <aside
       style={{
@@ -164,6 +175,140 @@ export const Sidebar: FC<SidebarProps> = ({
               onChange={importLibrary}
             />
           </label>
+        )}
+
+        {/* 🏠 ROOMS SECTION */}
+        {status === "open" && (
+          <div
+            style={{
+              marginTop: "10px",
+              paddingBottom: "10px",
+              borderBottom: "1px solid rgba(255,255,255,0.1)",
+              display: "flex",
+              flexDirection: "column",
+              gap: "10px",
+            }}
+          >
+            {/* The Toggle Header */}
+            <button
+              onClick={() => setIsRoomsExpanded(!isRoomsExpanded)}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "white",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                fontWeight: "bold",
+                fontSize: "0.85rem",
+                textTransform: "uppercase",
+                letterSpacing: "1px",
+              }}
+            >
+              <span
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                🏠 Rooms
+              </span>
+              <span>{isRoomsExpanded ? "▼" : "▶"}</span>
+            </button>
+
+            {/* The Expandable List */}
+            {isRoomsExpanded && (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "5px",
+                  marginTop: "5px",
+                }}
+              >
+                {allRooms.map((room) => (
+                  <div
+                    key={room}
+                    style={{
+                      display: "flex",
+                      gap: "4px",
+                      alignItems: "center",
+                    }}
+                  >
+                    {/* The main button to switch rooms */}
+                    <button
+                      onClick={() => setCurrentRoom(room)}
+                      style={{
+                        flexGrow: 1,
+                        textAlign: "left",
+                        padding: "8px 12px",
+                        background:
+                          currentRoom === room
+                            ? "#58acff"
+                            : "rgba(255,255,255,0.05)",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        fontSize: "0.85rem",
+                        transition: "all 0.2s",
+                      }}
+                    >
+                      {room}
+                    </button>
+
+                    {/* 🟢 The Rename Button (Only in Edit Mode) */}
+                    {mode === "edit" && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevents switching rooms when clicking edit
+                          renameRoom(room);
+                        }}
+                        style={{
+                          background: "rgba(255,255,255,0.1)",
+                          border: "none",
+                          color: "white",
+                          padding: "8px",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                          fontSize: "0.7rem",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                        title="Rename Room"
+                      >
+                        ✏️
+                      </button>
+                    )}
+                  </div>
+                ))}
+
+                {/* The "New Room" Trigger */}
+                {mode === "edit" && (
+                  <button
+                    onClick={() => {
+                      const name = window.prompt("Enter new room name:");
+                      if (name && name.trim() !== "") {
+                        addRoom(name.trim());
+                      }
+                    }}
+                    style={{
+                      marginTop: "8px",
+                      background: "transparent",
+                      border: "1px dashed rgba(255,255,255,0.4)",
+                      color: "rgba(255,255,255,0.7)",
+                      padding: "6px",
+                      cursor: "pointer",
+                      borderRadius: "4px",
+                      fontSize: "0.75rem",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    + Create New Room
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         )}
         {status === "open" && mode === "edit" && (
           <div

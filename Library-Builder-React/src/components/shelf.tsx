@@ -35,16 +35,18 @@ export const Shelf: FC<ShelfProps> = ({
   const {
     attributes,
     listeners,
-    setNodeRef,
+    setNodeRef, // This is a ref that we need to set on the root element of the shelf to make it draggable.
     transform,
     transition,
-    isDragging,
+    isDragging, // This is a boolean that indicates whether the shelf is currently being dragged.
   } = useSortable({ id: id });
 
+  // Resizing State for the shelf width
   const [isResizing, setIsResizing] = useState(false);
   const [startX, setStartX] = useState(0);
   const [startWidth, setStartWidth] = useState(width);
 
+  // Style for the shelf container, including drag and drop and resizing effects
   const style = {
     transform: CSS.Transform.toString(transform),
     transition: isDragging ? "none" : transition, // Disables transition while dragging for instant response
@@ -53,6 +55,7 @@ export const Shelf: FC<ShelfProps> = ({
     boxShadow: isDragging ? "0 10px 20px rgba(0,0,0,0.3)" : "none", // Adds a "lift" effect
   };
 
+  // Mouse event handlers for resizing the shelf width.
   const handleMouseDown = (e: React.MouseEvent) => {
     if (mode !== "edit") return;
     setIsResizing(true);
@@ -61,6 +64,7 @@ export const Shelf: FC<ShelfProps> = ({
     e.preventDefault(); // Stops the screen from highlighting text while you drag!
   };
 
+  // Effect to handle mouse move and mouse up events for resizing the shelf width.
   useEffect(() => {
     if (!isResizing) return;
 
@@ -78,13 +82,18 @@ export const Shelf: FC<ShelfProps> = ({
       }
     };
 
+    // When the user releases the mouse button, we stop resizing.
     const handleMouseUp = () => {
       setIsResizing(false);
     };
 
+    // We listen to mousemove and mouseup on the window to ensure we
+    // capture these events even if the cursor goes outside the shelf area.
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseup", handleMouseUp);
 
+    // Cleanup function to remove event listeners when the component
+    // unmounts or when resizing stops.
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
@@ -95,6 +104,8 @@ export const Shelf: FC<ShelfProps> = ({
   const [isHoveringTitle, setIsHoveringTitle] = useState(false);
 
   return (
+    // The main container for the shelf, which is also the draggable element.
+    // It includes the title, edit button, and the area where books are displayed.
     <div
       ref={setNodeRef}
       style={{
@@ -107,6 +118,7 @@ export const Shelf: FC<ShelfProps> = ({
         boxSizing: "border-box",
       }}
     >
+      {/* The resize handle on the right edge of the shelf, which only appears in edit mode. */}
       {mode === "edit" && (
         <div
           onMouseDown={handleMouseDown}
@@ -125,6 +137,8 @@ export const Shelf: FC<ShelfProps> = ({
           }}
         />
       )}
+      {/*The header of the shelf, which includes the title and the edit button. 
+      It also serves as the handle for dragging the shelf when in edit mode.*/}
       <div
         {...attributes}
         {...listeners}
@@ -137,6 +151,7 @@ export const Shelf: FC<ShelfProps> = ({
           padding: "0 10px",
         }}
       >
+        {/* The title of the shelf, which shows a tooltip with the full name when hovered. */}
         <div
           onMouseEnter={() => setIsHoveringTitle(true)}
           onMouseLeave={() => setIsHoveringTitle(false)}
@@ -156,7 +171,7 @@ export const Shelf: FC<ShelfProps> = ({
           >
             {name || "Untitled Shelf"}
           </h2>
-
+          {/* Custom tooltip that appears when hovering over the title, showing the full name of the shelf. */}
           {isHoveringTitle && (
             <div
               style={{

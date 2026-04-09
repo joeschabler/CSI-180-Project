@@ -27,6 +27,11 @@ interface LayoutProps {
   devOptionsEnabled: boolean;
   setDevOptionsEnabled: (val: boolean) => void;
   hardResetSite: () => void;
+  currentRoom: string;
+  setCurrentRoom: (name: string) => void;
+  allRooms: string[];
+  addRoom: (name: string) => void;
+  renameRoom: (newName: string) => void;
 }
 
 const Layout = ({
@@ -51,6 +56,11 @@ const Layout = ({
   devOptionsEnabled,
   setDevOptionsEnabled,
   hardResetSite,
+  currentRoom,
+  setCurrentRoom,
+  allRooms,
+  addRoom,
+  renameRoom,
 }: LayoutProps) => {
   return (
     <div
@@ -99,6 +109,11 @@ const Layout = ({
             devOptionsEnabled={devOptionsEnabled}
             setDevOptionsEnabled={setDevOptionsEnabled}
             hardResetSite={hardResetSite}
+            currentRoom={currentRoom}
+            setCurrentRoom={setCurrentRoom}
+            allRooms={allRooms}
+            addRoom={addRoom}
+            renameRoom={renameRoom}
           />
         </div>
 
